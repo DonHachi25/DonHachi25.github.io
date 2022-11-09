@@ -5854,11 +5854,14 @@ var addBody_1 = __webpack_require__(43303);
 
 var updateSignature = function (attachments) {
   return __awaiter(void 0, void 0, void 0, function () {
-    var attachmentWithStyle, attachmentsWithNotNullClassification, messageBody, body, signature, err_1;
-    return __generator(this, function (_a) {
-      switch (_a.label) {
+    var attachmentWithStyle, attachmentsWithNotNullClassification, attachmentsInWindow, messageBody, body, signature, err_1;
+
+    var _a;
+
+    return __generator(this, function (_b) {
+      switch (_b.label) {
         case 0:
-          _a.trys.push([0, 4,, 5]);
+          _b.trys.push([0, 4,, 5]);
 
           attachmentWithStyle = attachments.map(function (attachment) {
             return __assign(__assign({}, attachment), {
@@ -5871,15 +5874,40 @@ var updateSignature = function (attachments) {
           if (!(attachmentsWithNotNullClassification.length > 0)) return [3
           /*break*/
           , 3];
+          attachmentsInWindow = [];
+          attachmentsWithNotNullClassification.map(function (item) {
+            var temp = {
+              attachmentName: item.name,
+              classificationName: "(" + item.style.name + ")"
+            };
+            attachmentsInWindow.push(temp);
+          });
+
+          if (window["attachments"]) {
+            if (attachmentsInWindow.length >= ((_a = JSON.parse(window["attachments"])) === null || _a === void 0 ? void 0 : _a.length)) {
+              window["attachments"] = JSON.stringify(attachmentsInWindow);
+            }
+
+            ;
+          }
+
+          ;
+
+          if (!window["attachments"]) {
+            window["attachments"] = JSON.stringify(attachmentsInWindow);
+          }
+
+          ;
+          console.log(window["attachments"]);
           return [4
           /*yield*/
           , (0, addBody_1.getBody)()];
 
         case 1:
-          messageBody = _a.sent();
-          console.log(messageBody);
+          messageBody = _b.sent();
           body = (0, exports.clearSignature)(messageBody.value);
-          signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification);
+          signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification); //we can maybe change the signature to an HTML element by parsing and then add to the body
+
           console.log("UpdateSignature Body------>", {
             signature: signature,
             body: body,
@@ -5890,9 +5918,9 @@ var updateSignature = function (attachments) {
           , (0, addBody_1.addSignatureWithBodyPromise)(body, signature)];
 
         case 2:
-          _a.sent();
+          _b.sent();
 
-          _a.label = 3;
+          _b.label = 3;
 
         case 3:
           return [3
@@ -5900,7 +5928,7 @@ var updateSignature = function (attachments) {
           , 5];
 
         case 4:
-          err_1 = _a.sent();
+          err_1 = _b.sent();
           console.log("UpdateSignature Error in signature------>", err_1);
           return [3
           /*break*/
@@ -5920,14 +5948,57 @@ exports.updateSignature = updateSignature;
 var createSignature = function (oldSignature, attachments) {
   return "\n<b>Etiquetas de documentos adjuntos:</b>\n<p style='maring-top: 20px'>\n".concat(attachments.map(function (attachment) {
     var style = attachment.style;
-    return "<span style='align-items:center; padding-right: 20px;'> ".concat(attachment.name + "&nbsp", "<b style=\"color:").concat(style.color, ";\">(").concat(style.name, ")</b></span>");
+    return "<span style='align-items:center; padding-right: 20px;'> ".concat(attachment.name + "&nbsp", "<b style=\"color:").concat(style.color, ";\">(").concat(style.name, ")</b></span><br></br>");
   }), "\n</p>\n<div id=\"close\"></div>").replace(/,/g, "") + "".concat(oldSignature, "\n");
 };
 
 exports.createSignature = createSignature;
 
 var clearSignature = function (oldSignature) {
-  return oldSignature.replace(/\n/g, "").replace(/<b>Etiquetas de documentos adjuntos:<\/b>(.*)<div id="x_close"><\/div>/, "").replace(/\n/g, "");
+  var output = oldSignature;
+
+  if (!Office.context.mailbox.item.addHandlerAsync) {
+    var attachments = JSON.parse(window["attachments"]);
+    output = oldSignature.replace(/Etiquetas de documentos adjuntos:/gim, "");
+    attachments.map(function (item) {
+      console.log(item.attachmentName, item.classificationName); // const regexAttachmentName = new RegExp(item.attachmentName, "gim");
+      // const regexAttachmentClassification = new RegExp(item.classificationName, "gim");
+      // output = oldSignature.replace(/\n/g, "").replace(regexAttachmentName, "").replace(/\n/g, "");
+      // output = oldSignature.replace(/\n/g, "").replace(regexAttachmentClassification, "").replace(/\n/g, "");
+      // output = oldSignature.replace(/\n/g, "").replace(/<b>(.*)<\/b>/gim, "");
+
+      console.log("search", output.indexOf(item.attachmentName));
+      var indexAttachmentName = output.indexOf(item.attachmentName);
+
+      while (indexAttachmentName != -1) {
+        output = output.replace(item.attachmentName, "");
+        indexAttachmentName = output.indexOf(item.attachmentName);
+        console.log("search", output.indexOf(item.attachmentName));
+      }
+
+      ;
+      console.log("search", output.indexOf(item.classificationName));
+      var indexClassificationName = output.indexOf(item.classificationName);
+
+      while (indexClassificationName != -1) {
+        output = output.replace(item.classificationName, "");
+        indexClassificationName = output.indexOf(item.classificationName);
+        console.log("search", output.indexOf(item.classificationName));
+      }
+
+      ;
+    });
+  }
+
+  ;
+  console.log(output.match(/.{1,500}/g));
+
+  if (Office.context.mailbox.item.addHandlerAsync) {
+    output = oldSignature.replace(/\n/g, "").replace(/<b>Etiquetas de documentos adjuntos:<\/b>(.*)<div id="x_close"><\/div>/, "").replace(/\n/g, "");
+  }
+
+  ;
+  return output;
 };
 
 exports.clearSignature = clearSignature;
@@ -5969,6 +6040,33 @@ var attachmentsStyles = function (attachment) {
   }
 
   return arr;
+};
+
+var attachmentsClassificationNames = function (attachment) {
+  var name = null;
+
+  switch (attachment.classification) {
+    case "public":
+      name = "Público";
+      break;
+
+    case "restricted":
+      name = "Restringido";
+      break;
+
+    case "confidential":
+      name = "Confidencial";
+      break;
+
+    case "internalUse":
+      name = "Uso interno";
+      break;
+
+    default:
+      null;
+  }
+
+  return name;
 }; // This methods could help in case of use setSignature (take into account that the current signature is deleted)
 // export const updateSignature = async (attachments: AttachmentAndClassification[]) => {
 //   try {
