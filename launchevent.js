@@ -5905,6 +5905,7 @@ var updateSignature = function (attachments) {
 
         case 1:
           messageBody = _b.sent();
+          console.log(messageBody.value.match(/.{1,500}/g));
           body = (0, exports.clearSignature)(messageBody.value);
           signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification); //we can maybe change the signature to an HTML element by parsing and then add to the body
 
@@ -5961,12 +5962,7 @@ var clearSignature = function (oldSignature) {
     var attachments = JSON.parse(window["attachments"]);
     output = oldSignature.replace(/Etiquetas de documentos adjuntos:/gim, "");
     attachments.map(function (item) {
-      console.log(item.attachmentName, item.classificationName); // const regexAttachmentName = new RegExp(item.attachmentName, "gim");
-      // const regexAttachmentClassification = new RegExp(item.classificationName, "gim");
-      // output = oldSignature.replace(/\n/g, "").replace(regexAttachmentName, "").replace(/\n/g, "");
-      // output = oldSignature.replace(/\n/g, "").replace(regexAttachmentClassification, "").replace(/\n/g, "");
-      // output = oldSignature.replace(/\n/g, "").replace(/<b>(.*)<\/b>/gim, "");
-
+      console.log(item.attachmentName, item.classificationName);
       console.log("search", output.indexOf(item.attachmentName));
       var indexAttachmentName = output.indexOf(item.attachmentName);
 
@@ -5991,7 +5987,6 @@ var clearSignature = function (oldSignature) {
   }
 
   ;
-  console.log(output.match(/.{1,500}/g));
 
   if (Office.context.mailbox.item.addHandlerAsync) {
     output = oldSignature.replace(/\n/g, "").replace(/<b>Etiquetas de documentos adjuntos:<\/b>(.*)<div id="x_close"><\/div>/, "").replace(/\n/g, "");
