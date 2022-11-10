@@ -5854,14 +5854,14 @@ var addBody_1 = __webpack_require__(43303);
 
 var updateSignature = function (attachments) {
   return __awaiter(void 0, void 0, void 0, function () {
-    var attachmentWithStyle, attachmentsWithNotNullClassification, attachmentsInWindow, messageBody, body, signature, err_1;
+    var attachmentWithStyle, attachmentsWithNotNullClassification, messageBody, body, attachmentsInWindow, messageBody, body, signature, err_1;
 
     var _a;
 
     return __generator(this, function (_b) {
       switch (_b.label) {
         case 0:
-          _b.trys.push([0, 4,, 5]);
+          _b.trys.push([0, 7,, 8]);
 
           attachmentWithStyle = attachments.map(function (attachment) {
             return __assign(__assign({}, attachment), {
@@ -5871,9 +5871,36 @@ var updateSignature = function (attachments) {
           attachmentsWithNotNullClassification = attachmentWithStyle.filter(function (attachment) {
             return attachment.style !== null;
           });
-          if (!(attachmentsWithNotNullClassification.length > 0)) return [3
+          if (!(attachmentsWithNotNullClassification.length == 0)) return [3
           /*break*/
           , 3];
+          console.log("0");
+          return [4
+          /*yield*/
+          , (0, addBody_1.getBody)()];
+
+        case 1:
+          messageBody = _b.sent();
+          body = (0, exports.clearSignature)(messageBody.value);
+          console.log("UpdateSignature Body------>", {
+            body: body,
+            attachments: attachments
+          });
+          return [4
+          /*yield*/
+          , (0, addBody_1.addSignatureWithBodyPromise)(body, "")];
+
+        case 2:
+          _b.sent();
+
+          _b.label = 3;
+
+        case 3:
+          ;
+          if (!(attachmentsWithNotNullClassification.length > 0)) return [3
+          /*break*/
+          , 6];
+          console.log(">0");
           attachmentsInWindow = [];
           attachmentsWithNotNullClassification.map(function (item) {
             var temp = {
@@ -5903,12 +5930,10 @@ var updateSignature = function (attachments) {
           /*yield*/
           , (0, addBody_1.getBody)()];
 
-        case 1:
+        case 4:
           messageBody = _b.sent();
-          console.log(messageBody.value.match(/.{1,500}/g));
           body = (0, exports.clearSignature)(messageBody.value);
-          signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification); //we can maybe change the signature to an HTML element by parsing and then add to the body
-
+          signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification);
           console.log("UpdateSignature Body------>", {
             signature: signature,
             body: body,
@@ -5918,24 +5943,24 @@ var updateSignature = function (attachments) {
           /*yield*/
           , (0, addBody_1.addSignatureWithBodyPromise)(body, signature)];
 
-        case 2:
+        case 5:
           _b.sent();
 
-          _b.label = 3;
+          _b.label = 6;
 
-        case 3:
+        case 6:
           return [3
           /*break*/
-          , 5];
+          , 8];
 
-        case 4:
+        case 7:
           err_1 = _b.sent();
           console.log("UpdateSignature Error in signature------>", err_1);
           return [3
           /*break*/
-          , 5];
+          , 8];
 
-        case 5:
+        case 8:
           return [2
           /*return*/
           ];
@@ -5956,6 +5981,7 @@ var createSignature = function (oldSignature, attachments) {
 exports.createSignature = createSignature;
 
 var clearSignature = function (oldSignature) {
+  console.log("clearing the signature");
   var output = oldSignature;
 
   if (!Office.context.mailbox.item.addHandlerAsync) {
@@ -5984,6 +6010,13 @@ var clearSignature = function (oldSignature) {
 
       ;
     });
+    var oldSignatureArray = output.match(/.{1,500}/g);
+    var newOutput = "";
+    oldSignatureArray.map(function (item) {
+      newOutput = newOutput + item.replace("Etiquetas de documentos adjuntos:", "");
+    });
+    console.log("newOutput", newOutput.match(/.{1,500}/g));
+    output = newOutput;
   }
 
   ;
