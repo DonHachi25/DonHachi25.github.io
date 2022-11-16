@@ -5854,14 +5854,14 @@ var addBody_1 = __webpack_require__(43303);
 
 var updateSignature = function (attachments) {
   return __awaiter(void 0, void 0, void 0, function () {
-    var attachmentWithStyle, attachmentsWithNotNullClassification, messageBody, body, attachmentsInWindow, messageBody, body, signature, err_1;
+    var attachmentWithStyle, attachmentsWithNotNullClassification, attachments_1, messageBody, body, attachmentsInWindow, messageBody, body, signature, err_1;
 
     var _a;
 
     return __generator(this, function (_b) {
       switch (_b.label) {
         case 0:
-          _b.trys.push([0, 7,, 8]);
+          _b.trys.push([0, 8,, 9]);
 
           attachmentWithStyle = attachments.map(function (attachment) {
             return __assign(__assign({}, attachment), {
@@ -5873,8 +5873,12 @@ var updateSignature = function (attachments) {
           });
           if (!(attachmentsWithNotNullClassification.length == 0)) return [3
           /*break*/
+          , 4];
+          attachments_1 = JSON.parse(window["attachments"]);
+          if (!attachments_1) return [3
+          /*break*/
           , 3];
-          console.log("0");
+          console.log("0 attachments");
           return [4
           /*yield*/
           , (0, addBody_1.getBody)()];
@@ -5884,7 +5888,7 @@ var updateSignature = function (attachments) {
           body = (0, exports.clearSignature)(messageBody.value);
           console.log("UpdateSignature Body------>", {
             body: body,
-            attachments: attachments
+            attachments: attachments_1
           });
           return [4
           /*yield*/
@@ -5897,10 +5901,14 @@ var updateSignature = function (attachments) {
 
         case 3:
           ;
+          _b.label = 4;
+
+        case 4:
+          ;
           if (!(attachmentsWithNotNullClassification.length > 0)) return [3
           /*break*/
-          , 6];
-          console.log(">0");
+          , 7];
+          console.log("mas de 0 attachments");
           attachmentsInWindow = [];
           attachmentsWithNotNullClassification.map(function (item) {
             var temp = {
@@ -5930,7 +5938,7 @@ var updateSignature = function (attachments) {
           /*yield*/
           , (0, addBody_1.getBody)()];
 
-        case 4:
+        case 5:
           messageBody = _b.sent();
           body = (0, exports.clearSignature)(messageBody.value);
           signature = (0, exports.createSignature)("", attachmentsWithNotNullClassification);
@@ -5943,24 +5951,24 @@ var updateSignature = function (attachments) {
           /*yield*/
           , (0, addBody_1.addSignatureWithBodyPromise)(body, signature)];
 
-        case 5:
+        case 6:
           _b.sent();
 
-          _b.label = 6;
-
-        case 6:
-          return [3
-          /*break*/
-          , 8];
+          _b.label = 7;
 
         case 7:
+          return [3
+          /*break*/
+          , 9];
+
+        case 8:
           err_1 = _b.sent();
           console.log("UpdateSignature Error in signature------>", err_1);
           return [3
           /*break*/
-          , 8];
+          , 9];
 
-        case 8:
+        case 9:
           return [2
           /*return*/
           ];
@@ -5983,40 +5991,49 @@ exports.createSignature = createSignature;
 var clearSignature = function (oldSignature) {
   console.log("clearing the signature");
   var output = oldSignature;
+  console.log("oldinput", output.match(/.{1,500}/g));
 
   if (!Office.context.mailbox.item.addHandlerAsync) {
     var attachments = JSON.parse(window["attachments"]);
-    output = oldSignature.replace(/Etiquetas de documentos adjuntos:/gim, "");
-    attachments.map(function (item) {
-      console.log(item.attachmentName, item.classificationName);
-      console.log("search", output.indexOf(item.attachmentName));
-      var indexAttachmentName = output.indexOf(item.attachmentName);
 
-      while (indexAttachmentName != -1) {
-        output = output.replace(item.attachmentName, "");
-        indexAttachmentName = output.indexOf(item.attachmentName);
+    if (attachments) {
+      output = oldSignature.replace(/Etiquetas de documentos adjuntos:/gim, "");
+      attachments.map(function (item) {
+        console.log(item.attachmentName, item.classificationName);
         console.log("search", output.indexOf(item.attachmentName));
-      }
+        var indexAttachmentName = output.indexOf(item.attachmentName);
 
-      ;
-      console.log("search", output.indexOf(item.classificationName));
-      var indexClassificationName = output.indexOf(item.classificationName);
+        while (indexAttachmentName != -1) {
+          output = output.replace(item.attachmentName, "");
+          indexAttachmentName = output.indexOf(item.attachmentName);
+          console.log("search", output.indexOf(item.attachmentName));
+        }
 
-      while (indexClassificationName != -1) {
-        output = output.replace(item.classificationName, "");
-        indexClassificationName = output.indexOf(item.classificationName);
+        ;
         console.log("search", output.indexOf(item.classificationName));
+        var indexClassificationName = output.indexOf(item.classificationName);
+
+        while (indexClassificationName != -1) {
+          output = output.replace(item.classificationName, "");
+          indexClassificationName = output.indexOf(item.classificationName);
+          console.log("search", output.indexOf(item.classificationName));
+        }
+
+        ;
+      });
+      var oldSignatureArray = output.match(/.{1,500}/g);
+      var newOutput = "";
+
+      for (var i = oldSignatureArray.length - 1; i >= 0; i--) {
+        console.log(oldSignatureArray[i]);
       }
 
-      ;
-    });
-    var oldSignatureArray = output.match(/.{1,500}/g);
-    var newOutput = "";
-    oldSignatureArray.map(function (item) {
-      newOutput = newOutput + item.replace("Etiquetas de documentos adjuntos:", "");
-    });
-    console.log("newOutput", newOutput.match(/.{1,500}/g));
-    output = newOutput;
+      oldSignatureArray.map(function (item) {
+        newOutput = newOutput + item.replace("Etiquetas de documentos adjuntos:", ""); // newOutput = newOutput + item.replace(/<b>Etiquetas de documentos adjuntos:<\/b>/, "");
+      });
+      console.log("newOutput", newOutput.match(/.{1,500}/g));
+      output = newOutput;
+    }
   }
 
   ;
